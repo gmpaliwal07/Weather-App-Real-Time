@@ -30,50 +30,50 @@ Before you begin, ensure you have met the following requirements:
 
 Install dependencies for both the backend and frontend:
 
-bash
-Copy code
 # For backend
+
+```bash
 cd w-api
 npm install
 
+```
 # For frontend
+```bash
 cd ../weather-monitoring-client
 npm install
-
+```
 
 Backend Setup
 Navigate to the backend directory:
 
-bash
-Copy code
+```bash
 cd w-api
+```
 Create a .env file in the w-api directory with the following structure:
 
-plaintext
-Copy code
+```bash
 
 MONGO_URL=mongodb://localhost:27017/weather
 OPENWEATHER_API_KEY=Your_API_KEY
+```
 MONGO_URL: The connection string for your MongoDB database. Make sure MongoDB is running locally.
 OPENWEATHER_API_KEY: Your API key for accessing OpenWeatherMap.
 Start the backend server:
 
-bash
-Copy code
-npm run dev
+```bash
+nodemon app.js
+```
 The backend API should now be running on http://localhost:5000 (or the port specified in your setup).
 
 Frontend Setup
 Navigate to the frontend directory:
-
-bash
-Copy code
+```bash
 cd ../weather-monitoring-client
+```
 Start the development server:
-
-bash
-Copy code
+```bash
 npm run dev
+```
 Open your browser and go to http://localhost:3000 (or the appropriate port specified in your frontend setup).
 
 Environment Variables
@@ -89,3 +89,8 @@ Features
 Real-time weather updates from OpenWeatherMap.
 Visualizations using react-chartjs-2 and recharts.
 Responsive design with Tailwind CSS.
+
+
+
+API has feature to calling in each five minute interval for this I have used the node-cron
+for summary we have to start server for more than one day
