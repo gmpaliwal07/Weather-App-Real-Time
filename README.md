@@ -29,7 +29,6 @@ Before you begin, ensure you have met the following requirements:
 
 
 Install dependencies for both the backend and frontend:
-
 # For backend
 
 ```bash
