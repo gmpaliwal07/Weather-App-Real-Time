@@ -1,7 +1,7 @@
+import  { useState } from 'react';
 import Lottie from 'react-lottie';
 import { animateScroll as scroll } from 'react-scroll';
 import Cloudy from '../lotties/Cloudy.json';
-import { useState } from 'react';
 import searchIcon from '/assets/search.svg';
 
 function Navbar({ onSearch }) {
@@ -19,37 +19,55 @@ function Navbar({ onSearch }) {
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchTerm.trim()) {
-      onSearch(searchTerm); // Trigger the parent component’s onSearch function
-      setSearchTerm(''); // Clear the input after search
+      onSearch(searchTerm);
+      setSearchTerm('');
     }
   };
 
   return (
-    <div className=' z-10 text-center md:justify-center p-4 bg-primary fixed md:w-full'>
-      <div className="flex flex-col md:flex-row p-3 justify-between drop-shadow-xl items-center border rounded-lg">
-        <div className="flex items-center pl-2 cursor-pointer" onClick={() => scroll.scrollToTop({ smooth: true, duration: 500 })}>
-          <h1 className="md:text-4xl text-xl font-bold text-text font-mono mr-4 mt-2">
-            Weather
-          </h1>
-          <Lottie options={defaultOptions} height={50} width={50} />
-        </div>
-        <form onSubmit={handleSearch} className="flex items-center w-full md:w-1/3 mt-2 md:mt-0">
-          <input
-            type="text"
-            placeholder="Search city..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="p-3 border md:w-full  text-text rounded-full text-lg font-sans backdrop-blur-md bg-white/30 placeholder:text-text border-white/20 font-bold mr-2 placeholder:font-bold placeholder:font-sans placeholder:text-lg focus:outline-none"
-          />
-          <button 
-            type="submit" 
-            className="p-2 text-text rounded-lg transition duration-300 ease-in-out transform hover:scale-110"
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-br from-gray-600 via-gray-700 to-gray-800 backdrop-blur-lg">
+      <div className="container mx-auto px-4 py-3">
+        <div className="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
+          <div 
+            className="flex items-center cursor-pointer hover:scale-105 transition-transform"
+            onClick={() => scroll.scrollToTop({ smooth: true, duration: 500 })}
           >
-            <img src={searchIcon} alt="search" className="md:w-8 md:h-8 w-6 h-6" />
-          </button>
-        </form>
+            <h1 className="text-2xl md:text-4xl font-bold text-white font-mono mr-4">
+              Weather App
+            </h1>
+            <Lottie options={defaultOptions} height={50} width={50} />
+          </div>
+          
+          <form onSubmit={handleSearch} className="w-full md:w-1/3">
+            <div className="relative flex items-center">
+              <input
+                type="text"
+                placeholder="Search city..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-4 pr-12 py-3 text-white rounded-full 
+                  bg-gray-800/50 backdrop-blur-lg 
+                  border border-gray-700 
+                  focus:outline-none focus:ring-2 focus:ring-gray-500 
+                  placeholder:text-gray-400 text-lg"
+              />
+              <button 
+                type="submit" 
+                className="absolute right-2 p-2 rounded-full 
+                  hover:bg-gray-700 transition-all duration-300 
+                  flex items-center justify-center"
+              >
+                <img 
+                  src={searchIcon} 
+                  alt="search" 
+                  className="w-6 h-6 md:w-7 md:h-7 invert opacity-70 hover:opacity-100"
+                />
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
-    </div>
+    </nav>
   );
 }
 

@@ -1,9 +1,9 @@
 import './App.css';
-import DisplayWeather from './components/DisplayWeather';
+import axios from 'axios';
 import Navbar from './components/Navbar';
 import WeatherSummary from './components/WeatherSummary';
 import RollupAggregateDisplay from './components/RollupsAndAggregate';
-import React, { useState } from 'react';
+import  { useState } from 'react';
 
 function App() {
   const [city, setCity] = useState('Mumbai'); 
@@ -15,20 +15,25 @@ function App() {
     setLoading(true);
     setError(null); 
 
-  
-    
-    setLoading(false); 
+    try {
+      // Verify city data exists - you might want to replace this with your actual API endpoint
+      const response = await axios.get(`http://localhost:3000/summary?city=${searchedCity}`);
+      
+      // If no error is thrown, the city exists
+      setLoading(false);
+    } catch (err) {
+      // Handle errors if city is not found or API call fails
+      setError(`Could not find weather data for ${searchedCity}`);
+      setLoading(false);
+    }
   };
 
   return (
-    <>
-      <div className="bg-primary min-h-screen ">
+    <div className="bg-primary min-h-screen">
       <Navbar onSearch={handleSearch} />
-        <DisplayWeather city={city} loading={loading} error={error}/>
-        <WeatherSummary city={city} loading={loading} error={error} />
-        <RollupAggregateDisplay city={city} loading={loading} error={error} />
-      </div>
-    </>
+      <WeatherSummary city={city} loading={loading} error={error} />
+      <RollupAggregateDisplay city={city} loading={loading} error={error} />
+    </div>
   );
 }
 

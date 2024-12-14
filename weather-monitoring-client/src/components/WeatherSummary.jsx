@@ -1,109 +1,209 @@
-import { useState, useEffect } from "react";
-import Card from "./Card";
-import SunCycle from "./SunCycle";
-import axios from "axios";
-import Lottie from "react-lottie";
-import LoadingAnimation from "../lotties/loading.json"; // Ensure the path is correct
+import React, { useEffect } from 'react';
+import axios from 'axios';
+import Lottie from 'react-lottie';
+import loadingAnimation from '../lotties/loading.json';
+import Cloudy from '../lotties/Cloudy.json'; 
+import Rainy from '../lotties/Rainy.json'; 
+import Sunny from '../lotties/Sunny.json'; 
+import Wind from '../lotties/wind-day.json'; 
+import Thunderstorm from '../lotties/thunderstorm.json';
+import sunriseImage from '/assets/sunrise.svg'; 
+import sunsetImage from '/assets/sunset.svg'; 
+import humidityIcon from '/assets/humidity.svg'
+import visibilityIcon from '/assets/visiblity.svg'
+import pressureIcon from '/assets/pressure.svg'
+import windIcon from '/assets/wind.svg'
+
+const getGradientBackground = (condition) => {
+    const gradients = {
+        'sunny': 'from-gray-500 via-gray-600 to-gray-700',
+        'rain': 'from-gray-600 via-gray-700 to-gray-800',
+        'cloudy': 'from-gray-500 via-gray-600 to-gray-700',
+        'windy': 'from-gray-600 via-gray-700 to-gray-800',
+        'thunderstorm': 'from-gray-700 via-gray-800 to-gray-900',
+        'default': 'from-gray-600 via-gray-700 to-gray-800'
+    };
+    return gradients[condition.toLowerCase()] || gradients['default'];
+};
+
+const getAnimationData = (condition) => {
+    const animations = {
+        'sunny': Sunny,
+        'rain': Rainy,
+        'cloudy': Cloudy,
+        'windy': Wind,
+        'thunderstorm': Thunderstorm
+    };
+    return animations[condition.toLowerCase()] || Cloudy;
+};
 
 const WeatherSummary = ({ city }) => {
-  const [tempMin, setTempMin] = useState(null);
-  const [main, setMain] = useState('');
-  const [humidity, setHumidity] = useState(null);
-  const [wind, setWind] = useState(null);
-  const [visibility, setVisibility] = useState(null);
-  const [pressure, setPressure] = useState(null);
-  const [sunrise, setSunrise] = useState("");
-  const [sunset, setSunset] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null); // Added error state
+    const [weatherData, setWeatherData] = React.useState({
+        tempMin: null,
+        main: '',
+        humidity: null,
+        wind: null,
+        visibility: null,
+        pressure: null,
+        sunrise: '',
+        sunset: '',
+    });
+    const [loading, setLoading] = React.useState(true);
 
-  const loadingOptions = {
-    loop: true,
-    autoplay: true,
-    animationData: LoadingAnimation,
-    rendererSettings: {
-      preserveAspectRatio: "xMidYMid slice",
-    },
-  };
+    const fetchWeatherData = async () => {
+        try {
+            const response = await axios.get(`http://localhost:3000/weather?city=${city}`);
+            const data = response.data.weather;
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      setError(null); // Reset error state before fetching
-      try {
-        const response = await axios.get(`http://localhost:3000/weather?city=${city}`);
-        const data = response.data.weather;
-
-        setTempMin((data.low_temp - 273.15).toFixed(2));
-        setHumidity(data.humidity);
-        setWind(data.wind_speed);
-        setMain(data.main);
-        setVisibility((data.visibility / 1000).toFixed(2));
-        setPressure(data.pressure);
-
-        const sunriseTime = new Date(data.sunrise * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        const sunsetTime = new Date(data.sunset * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-        setSunrise(sunriseTime);
-        setSunset(sunsetTime);
-
-        // Simulate delay
-        setTimeout(() => setLoading(false), 2000);
-      } catch (error) {
-        console.error("Error fetching weather data:", error);
-        setError("Failed to fetch weather data."); // Set error message
-        setLoading(false);
-      }
+            setWeatherData({
+                tempMin: (data.low_temp - 273.15).toFixed(1),
+                main: data.main,
+                humidity: data.humidity,
+                wind: data.wind_speed.toFixed(1),
+                visibility: (data.visibility / 1000).toFixed(1),
+                pressure: data.pressure,
+                sunrise: new Date(data.sunrise * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                sunset: new Date(data.sunset * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            });
+        } catch (error) {
+            console.error("Error fetching weather data:", error);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    fetchData();
-  }, [city]);
+    useEffect(() => {
+        setLoading(true);
+        fetchWeatherData();
+    }, [city]);
 
-  const data = [
-    { img: "/assets/humidity.svg", title: "Humidity", value: `${humidity}%` },
-    { img: "/assets/wind.svg", title: "Wind", value: `${wind} km/h` },
-    { img: "/assets/visiblity.svg", title: "Visibility", value: `${visibility} km` },
-    { img: "/assets/pressure.svg", title: "Pressure", value: `${pressure} hPa` },
-  ];
+    const animationData = getAnimationData(weatherData.main);
+    const gradientBg = getGradientBackground(weatherData.main);
+    
+    const defaultOptions = {
+        loop: true,
+        autoplay: true,
+        animationData, 
+        rendererSettings: {
+            preserveAspectRatio: 'xMidYMid slice', 
+        },
+    };
 
-  if (loading) {
+    if (loading) {
+        return (
+            <div className="flex  items-center justify-center min-h-screen bg-gradient-to-br from-gray-600 via-gray-700 to-gray-800">
+                <Lottie options={{
+                    ...defaultOptions,
+                    animationData: loadingAnimation
+                }} height={300} width={300}/>
+            </div>
+        );
+    }
+
     return (
-      <div className="flex items-center justify-center h-full">
-        <Lottie options={loadingOptions} height={150} width={150} />
-      </div>
-    );
-  }
+        <div className={`bg-gradient-to-br ${gradientBg} text-white mt-12`}>
+            <div className="container mx-auto px-4 py-16">
+                <div className="max-w-4xl mx-auto bg-white/20 backdrop-blur-lg rounded-3xl shadow-2xl overflow-hidden">
+                    <div className="p-8 md:p-12">
+                        <div className="flex md:flex-row flex-col items-center justify-between">
+                            <div className="text-center md:text-left mb-6 md:mb-0">
+                                <h1 className="text-3xl md:text-5xl font-bold mb-2 drop-shadow-md">{city}</h1>
+                                <p className="text-xl md:text-2xl opacity-80">
+                                    {weatherData.main}
+                                </p>
+                            </div>
+                            <div className="flex flex-col items-center">
+                                <h2 className="text-6xl md:text-8xl font-bold mb-2 drop-shadow-lg">
+                                    {weatherData.tempMin}°C
+                                </h2>
+                            </div>
+                        </div>
+                        
+                        <div className="mt-8 flex justify-center">
+                            <Lottie 
+                                options={defaultOptions} 
+                                height={300} 
+                                width={400} 
+                            />
+                        </div>
 
-  if (error) {
-    return (
-      <div className="text-red-500 text-xl p-8">
-        {error}
-      </div>
-    );
-  }
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 text-center">
+                            <div className="flex flex-col items-center">
+                                <div className="mb-4">
+                                    <img
+                                        src={humidityIcon}
+                                        alt="Humidity"
+                                        className="w-12 h-12 object-contain mx-auto mb-2"
+                                    />
+                                </div>
+                                <p className="text-xl opacity-80 mb-1">Humidity</p>
+                                <p className="text-2xl font-bold">{weatherData.humidity}%</p>
+                            </div>
+                            <div className="flex flex-col items-center">
+                                <div className="mb-4">
+                                    <img
+                                        src={windIcon}
+                                        alt="Wind"
+                                        className="w-12 h-12 object-contain mx-auto mb-2"
+                                    />
+                                </div>
+                                <p className="text-xl opacity-80 mb-1">Wind</p>
+                                <p className="text-2xl font-bold">{weatherData.wind} km/h</p>
+                            </div>
+                            <div className="flex flex-col items-center">
+                                <div className="mb-4">
+                                    <img
+                                        src={visibilityIcon}
+                                        alt="Visibility"
+                                        className="w-12 h-12 object-contain mx-auto mb-2"
+                                    />
+                                </div>
+                                <p className="text-xl opacity-80 mb-1">Visibility</p>
+                                <p className="text-2xl font-bold">{weatherData.visibility} km</p>
+                            </div>
+                            <div className="flex flex-col items-center">
+                                <div className="mb-4">
+                                    <img
+                                        src={pressureIcon}
+                                        alt="Pressure"
+                                        className="w-12 h-12 object-contain mx-auto mb-2"
+                                    />
+                                </div>
+                                <p className="text-xl opacity-80 mb-1">Pressure</p>
+                                <p className="text-2xl font-bold">{weatherData.pressure} hPa</p>
+                            </div>
+                        </div>
+                    
 
-  return (
-    <div className="flex flex-col md:flex-row gap-x-8 ">
-      <div className="p-8 md:w-1/2">
-        <span className="text-text font-mono text-2xl md:text-4xl font-bold mb-4">
-          {main}, {tempMin}°C
-        </span>
-        <div className="border-b-[1px] border-secondary mt-3" />
-        <div className="grid  grid-flow-row md:grid-cols-3 gap-4 mt-8">
-          {data.map((item, index) => (
-            <Card  key={index} img={item.img} title={item.title} value={item.value} />
-          ))}
+                        <div className="grid grid-cols-2 gap-4 mt-20 text-center">
+                            <div className="flex flex-col items-center">
+                                <div className="mb-4">
+                                    <img
+                                        src={sunriseImage}
+                                        alt="Sunrise"
+                                        className="w-12 h-12 object-contain mx-auto mb-2"
+                                    />
+                                </div>
+                                <p className="text-xl opacity-80 mb-1">Sunrise</p>
+                                <p className="text-2xl font-bold">{weatherData.sunrise}</p>
+                            </div>
+                            <div className="flex flex-col items-center">
+                                <div className="mb-4">
+                                    <img
+                                        src={sunsetImage}
+                                        alt="Sunset"
+                                        className="w-12 h-12 object-contain mx-auto mb-2"
+                                    />
+                                </div>
+                                <p className="text-xl opacity-80 mb-1">Sunset</p>
+                                <p className="text-2xl font-bold">{weatherData.sunset}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-      <div className="flex flex-col md:justify-center gap-y-4">
-        <SunCycle />
-        <div className="grid  md:grid-flow-row md:grid-cols-3 md:gap-4 gap-8 mt-8">
-          <Card value={sunrise} title={"Sunrise"} />
-          <Card value={sunset} title={"Sunset"} />
-        </div>
-      </div>
-    </div>
-  );
+    );
 };
 
 export default WeatherSummary;
