@@ -1,3 +1,6 @@
 weather-monitoring-client/node_modules
 w-api/node_modules
 w-api/.env
+branch_structure.json
+temp_auto_push.bat
+temp_interactive_push.bat
